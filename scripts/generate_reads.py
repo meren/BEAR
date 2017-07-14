@@ -2,8 +2,7 @@
 
 
 from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
-import sys, csv, StringIO, random, decimal, argparse
+import csv, random, decimal, argparse
 
 
 
@@ -33,10 +32,10 @@ insert_avg = args.insert
 insert_stddev = args.stddev
 
 if(insert_avg):
-	f4 = open(args.output + '.1.fasta', 'w')
-	f5 = open(args.output + '.2.fasta', 'w')
+    f4 = open(args.output + '.1.fasta', 'w')
+    f5 = open(args.output + '.2.fasta', 'w')
 else:
-	f4 = open(args.output, 'w')
+    f4 = open(args.output, 'w')
 
 frags=[]
 
@@ -48,84 +47,84 @@ lengths=[]
 freqs=[]
 comp = {'A':'T', 'T':'A', 'G':'C', 'C':'G'}
 for row in div_file:
-	species.append(row[0][1:])
-	diversity.append(decimal.Decimal(row[1]))
+    species.append(row[0][1:])
+    diversity.append(decimal.Decimal(row[1]))
 
 
 for i in SeqIO.parse(f1, 'fasta') :
-	genome_num=0
-	while(not(species[genome_num] in i.description)) :
-		genome_num+=1
-	if(species[genome_num] in i.description) :
-		coverage=max(1, int((decimal.Decimal(diversity[genome_num])*total_reads)))
+    genome_num=0
+    while(not(species[genome_num] in i.description)) :
+        genome_num+=1
+    if(species[genome_num] in i.description) :
+        coverage=max(1, int((decimal.Decimal(diversity[genome_num])*total_reads)))
 
-		limit=len(i.seq)
-		for j in range(0, coverage) :
-                	rand = random.random()
-                	rand_length = 0
-                	numLen = len(lengths)-1
+        limit=len(i.seq)
+        for j in range(0, coverage) :
+            rand = random.random()
+            rand_length = 0
+            numLen = len(lengths)-1
 
-			if( (insert_avg != 0) & (insert_stddev != 0)):
-				cur_insert = int(random.gauss(insert_avg, insert_stddev))
-				if(limit > (max_read_length * 2 + cur_insert)):
-					start1 = random.randint(0, limit-(2*max_read_length + cur_insert))
-					end1 = start1 + max_read_length
-					start2 = end1 + cur_insert
-					end2 = start2 + max_read_length
-				else:
-					start1 = 0
-					end1 = limit
-					start2 = 0
-					end2 = limit
-				read1 = i.seq[start1:end1]
-				read2 = ''.join([comp[b] for b in i.seq[end2:start2:-1]])
-				if(args.direction):
-					check = random.random()
-					if(check < 0.5): #forward orientation
-						f4.write(">%s\n" % i.description)
-						f4.write("%s\n" % read1)
-						f5.write(">%s\n" % i.description)
-                                		f5.write("%s\n" % read2)
-					else: #reverse orientation
-						f4.write(">%s\n" % i.description)
-						f4.write("%s\n" % read1[::-1])
-						f5.write(">%s\n" % i.description)
-						f5.write("%s\n" % read2[::-1])
-				read2 = i.seq[end2:start2:-1]
-				if(args.direction and random.random() < 0.5):
-				        #reverse orientation
-					f4.write(">%s\n" % i.description)
-					f4.write("%s\n" % read1[::-1])
-					f5.write(">%s\n" % i.description)
-					f5.write("%s\n" % read2[::-1])
-				else:
-                                        #forward orientation
-                                        f4.write(">%s\n" % i.description)
-					f4.write("%s\n" % read1)
-					f5.write(">%s\n" % i.description)
-                                	f5.write("%s\n" % read2)
+            if( (insert_avg != 0) & (insert_stddev != 0)):
+                cur_insert = int(random.gauss(insert_avg, insert_stddev))
+                if(limit > (max_read_length * 2 + cur_insert)):
+                    start1 = random.randint(0, limit-(2*max_read_length + cur_insert))
+                    end1 = start1 + max_read_length
+                    start2 = end1 + cur_insert
+                    end2 = start2 + max_read_length
+                else:
+                    start1 = 0
+                    end1 = limit
+                    start2 = 0
+                    end2 = limit
+                read1 = i.seq[start1:end1]
+                read2 = ''.join([comp[b] for b in i.seq[end2:start2:-1]])
+                if(args.direction):
+                    check = random.random()
+                    if(check < 0.5): #forward orientation
+                        f4.write(">%s\n" % i.description)
+                        f4.write("%s\n" % read1)
+                        f5.write(">%s\n" % i.description)
+                        f5.write("%s\n" % read2)
+                    else: #reverse orientation
+                        f4.write(">%s\n" % i.description)
+                        f4.write("%s\n" % read1[::-1])
+                        f5.write(">%s\n" % i.description)
+                        f5.write("%s\n" % read2[::-1])
+                read2 = i.seq[end2:start2:-1]
+                if(args.direction and random.random() < 0.5):
+                    #reverse orientation
+                    f4.write(">%s\n" % i.description)
+                    f4.write("%s\n" % read1[::-1])
+                    f5.write(">%s\n" % i.description)
+                    f5.write("%s\n" % read2[::-1])
+                else:
+                    #forward orientation
+                    f4.write(">%s\n" % i.description)
+                    f4.write("%s\n" % read1)
+                    f5.write(">%s\n" % i.description)
+                    f5.write("%s\n" % read2)
 
-			else:
-				if(limit > max_read_length) :
-					start=random.randint(0, limit-max_read_length)
-					end=start+max_read_length
-				else:
-					start=0
-					end=limit
-				read = i.seq[start:end]
-				if(args.direction and random.random() < 0.5):
-                                        #reverse orientation
-					read = ''.join([comp[b] for b in i.seq[end:start:-1]])
-					f4.write(">%s\n" % i.description)
-					f4.write("%s\n" % read)
-					
-				else:
-                                        #forward orientation
-					f4.write(">%s\n" % i.description)
-					f4.write("%s\n" % read)
+            else:
+                if(limit > max_read_length) :
+                    start=random.randint(0, limit-max_read_length)
+                    end=start+max_read_length
+                else:
+                    start=0
+                    end=limit
+                read = i.seq[start:end]
+                if(args.direction and random.random() < 0.5):
+                    #reverse orientation
+                    read = ''.join([comp[b] for b in i.seq[end:start:-1]])
+                    f4.write(">%s\n" % i.description)
+                    f4.write("%s\n" % read)
+                    
+                else:
+                    #forward orientation
+                    f4.write(">%s\n" % i.description)
+                    f4.write("%s\n" % read)
 
-	if (genome_num >= len(species) ) :
-		break;
+    if (genome_num >= len(species) ) :
+        break;
 
 f1.close()
 f2.close()
